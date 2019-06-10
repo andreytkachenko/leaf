@@ -10,10 +10,10 @@
 //! * increases the likelyhood of a more beneficial sparse representation
 //! * can be computed faster
 //! * is therefore the most popular activation function in DNNs as of this writing (2016).
-use co::{IBackend, SharedTensor};
-use conn;
-use layer::*;
-use util::ArcLock;
+use crate::co::{IBackend, SharedTensor};
+use crate::conn;
+use crate::layer::*;
+use crate::util::ArcLock;
 
 #[derive(Debug, Clone)]
 #[allow(missing_copy_implementations)]

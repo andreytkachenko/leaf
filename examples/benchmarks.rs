@@ -4,11 +4,11 @@ extern crate env_logger;
 extern crate collenchyma as co;
 extern crate leaf;
 
-use co::prelude::*;
+use crate::co::prelude::*;
 
-use std::sync::{Arc, RwLock};
-use leaf::layers::*;
-use leaf::layer::*;
+
+
+
 use std::rc::Rc;
 use std::env;
 

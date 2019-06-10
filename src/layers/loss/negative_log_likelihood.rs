@@ -1,10 +1,10 @@
 //! TODO: DOC
 //!
-use co::{IBackend, ITensorDesc, SharedTensor};
-use layer::*;
-use util::{ArcLock, native_backend};
-use leaf_capnp::negative_log_likelihood_config as capnp_config;
-use capnp_util::*;
+use crate::co::{IBackend, ITensorDesc, SharedTensor};
+use crate::layer::*;
+use crate::util::{ArcLock, native_backend};
+use crate::leaf_capnp::negative_log_likelihood_config as capnp_config;
+use crate::capnp_util::*;
 
 #[derive(Debug, Clone)]
 #[allow(missing_copy_implementations)]
@@ -86,7 +86,7 @@ impl<B: IBackend> ComputeOutput<f32, B> for NegativeLogLikelihood {
         loss = loss / (batch_size as f32);
         writable_loss = vec![loss];
 
-        ::util::write_to_memory(output_data[0].get_mut(native.device()).unwrap(), &writable_loss);
+        crate::util::write_to_memory(output_data[0].get_mut(native.device()).unwrap(), &writable_loss);
     }
 }
 
@@ -111,7 +111,7 @@ impl<B: IBackend> ComputeInputGradient<f32, B> for NegativeLogLikelihood {
             writable_gradient[index] = -1f32;
         }
         input_gradients[0].sync(native.device()).unwrap();
-        ::util::write_to_memory(input_gradients[0].get_mut(native.device()).unwrap(), &writable_gradient);
+        crate::util::write_to_memory(input_gradients[0].get_mut(native.device()).unwrap(), &writable_gradient);
     }
 }
 

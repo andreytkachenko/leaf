@@ -19,15 +19,15 @@
 //! In the context of convolutional neural networks this layer is also
 //! called a "fully-connected layer" if it is used at the end of the network.
 use std::rc::Rc;
-use co::backend::IBackend;
-use co::tensor::SharedTensor;
-use coblas::transpose::Transpose;
-use coblas::plugin::*;
-use layer::*;
-use util::{ArcLock, native_scalar, LayerOps};
-use weight::FillerType;
-use leaf_capnp::linear_config as capnp_config;
-use capnp_util::*;
+use crate::co::backend::IBackend;
+use crate::co::tensor::SharedTensor;
+use crate::coblas::transpose::Transpose;
+use crate::coblas::plugin::*;
+use crate::layer::*;
+use crate::util::{ArcLock, native_scalar, LayerOps};
+use crate::weight::FillerType;
+use crate::leaf_capnp::linear_config as capnp_config;
+use crate::capnp_util::*;
 
 #[derive(Debug)]
 /// Linear Layer
@@ -107,7 +107,7 @@ impl<B: IBackend + LayerOps<f32>> ILayer<B> for Linear {
             };
             filler.fill(&mut weight.write().unwrap());
 
-            let native_backend = ::util::native_backend();
+            let native_backend = crate::util::native_backend();
             let bound_weight = weight.read().unwrap();
             let native_output = bound_weight.get(native_backend.device()).unwrap().as_native().unwrap();
         }

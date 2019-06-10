@@ -2,10 +2,10 @@
 //!
 //! See [Layers][layers]
 //! [layers]: ../layers/index.html
-use co::prelude::*;
-use layers::*;
-use weight::WeightConfig;
-use util::{ArcLock, native_backend, LayerOps};
+use crate::co::prelude::*;
+use crate::layers::*;
+use crate::weight::WeightConfig;
+use crate::util::{ArcLock, native_backend, LayerOps};
 use std::fmt;
 use std::cmp;
 use std::collections::{HashMap, HashSet};
@@ -14,10 +14,10 @@ use std::io::{self, BufReader};
 use std::path::Path;
 use std::rc::Rc;
 use std::sync::{Arc, RwLock};
-use leaf_capnp::layer as capnp_layer;
-use leaf_capnp::layer_config as capnp_layer_config;
-use leaf_capnp::layer_config::layer_type as capnp_layer_type;
-use capnp_util::*;
+use crate::leaf_capnp::layer as capnp_layer;
+use crate::leaf_capnp::layer_config as capnp_layer_config;
+use crate::leaf_capnp::layer_config::layer_type as capnp_layer_type;
+use crate::capnp_util::*;
 
 #[derive(Debug)]
 /// The generic Layer
@@ -34,7 +34,7 @@ pub struct Layer<B: IBackend> {
     /// This is the part that does most of the work ([forward][2]/[backward][3]).
     /// [2]: ./trait.ILayer.html#method.forward
     /// [3]: ./trait.ILayer.html#method.backward
-    pub worker: Box<ILayer<B>>,
+    pub worker: Box<dyn ILayer<B>>,
 
     backend: Rc<B>,
 
@@ -209,7 +209,7 @@ impl<B: IBackend> Layer<B> {
                 info!("Output {} = {}", output_id, blob_name);
             }
 
-            let backend: Rc<IBackend<F=B::F>> = self.backend.clone();
+            let backend: Rc<dyn IBackend<F=B::F>> = self.backend.clone();
             blob_data = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &vec![1,1,1]).unwrap())); // [1,1,1] for CUDA
             blob_gradient = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &vec![1,1,1]).unwrap())); // [1,1,1] for CUDA
         }
@@ -233,7 +233,7 @@ impl<B: IBackend> Layer<B> {
 
         info!("{} -> {}", self.name, blob_name);
 
-        let backend: Rc<IBackend<F=B::F>> = self.backend.clone();
+        let backend: Rc<dyn IBackend<F=B::F>> = self.backend.clone();
         let output_data = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &vec![1,1,1]).unwrap())); // [1,1,1] for CUDA
         let output_gradient = Arc::new(RwLock::new(SharedTensor::new(backend.device(), &vec![1,1,1]).unwrap())); // [1,1,1] for CUDA
         self.output_blobs_data.push(output_data);
@@ -552,8 +552,8 @@ impl<B: IBackend> Layer<B> {
     /// The update value is computed in previous steps according to the [learning rate policy][3]
     ///
     /// [3]: ../solver/enum.LRPolicy.html
-    pub fn update_weights<SolverB: IBackend + ::util::SolverOps<f32>>(&mut self, backend: &SolverB) {
-        let mut shared_a = ::util::native_scalar(-1f32);
+    pub fn update_weights<SolverB: IBackend + crate::util::SolverOps<f32>>(&mut self, backend: &SolverB) {
+        let mut shared_a = crate::util::native_scalar(-1f32);
         let _ = shared_a.add_device(IBackend::device(backend));
         shared_a.sync(IBackend::device(backend)).unwrap();
         for (weight_gradient, weight_data) in self.learnable_weights_gradients().iter().zip(&mut self.learnable_weights_data()) {
@@ -573,7 +573,7 @@ impl<B: IBackend> Layer<B> {
     /// [2]: ../solver/struct.Solver.html
     pub fn clear_weights_gradients(&mut self) {
         for weight_gradient in &mut self.learnable_weights_gradients().iter() {
-            let filler = ::weight::FillerType::Constant {
+            let filler = crate::weight::FillerType::Constant {
                 value: 0f32
             };
             filler.fill(&mut weight_gradient.write().unwrap());
@@ -618,7 +618,7 @@ impl<B: IBackend> Layer<B> {
     /// ```
     pub fn save<P: AsRef<Path>>(&mut self, path: P) -> io::Result<()> {
         let path = path.as_ref();
-        let ref mut out = try!(File::create(path));
+        let ref mut out = r#try!(File::create(path));
 
         let mut message = ::capnp::message::Builder::new_default();
         {
@@ -669,7 +669,7 @@ impl<B: IBackend> Layer<B> {
     /// ```
     pub fn load<LB: IBackend + LayerOps<f32> + 'static, P: AsRef<Path>>(backend: Rc<LB>, path: P) -> io::Result<Layer<LB>> {
         let path = path.as_ref();
-        let ref mut file = try!(File::open(path));
+        let ref mut file = r#try!(File::open(path));
         let mut reader = BufReader::new(file);
 
         let message_reader = ::capnp::serialize_packed::read_message(&mut reader,
@@ -705,7 +705,7 @@ impl<B: IBackend> Layer<B> {
                 }
                 weight_lock.reshape(&shape).unwrap();
 
-                let mut native_slice = weight_lock.get_mut(native_backend.device()).unwrap().as_mut_native().unwrap().as_mut_slice::<f32>();
+                let native_slice = weight_lock.get_mut(native_backend.device()).unwrap().as_mut_native().unwrap().as_mut_slice::<f32>();
                 let data = capnp_tensor.get_data().unwrap();
                 for k in 0..data.len() {
                     native_slice[k as usize] = data.get(k);
@@ -882,7 +882,7 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
     /// [1]: #method.from_config
     /// [2]: ./enum.LayerType.html
     /// [3]: ../layers/index.html
-    fn worker_from_config(backend: Rc<B>, config: &LayerConfig) -> Box<ILayer<B>> {
+    fn worker_from_config(backend: Rc<B>, config: &LayerConfig) -> Box<dyn ILayer<B>> {
         match config.layer_type.clone() {
             #[cfg(all(feature="cuda", not(feature="native")))]
             LayerType::Convolution(layer_config) => Box::new(Convolution::from_config(&layer_config)),
@@ -959,8 +959,8 @@ pub trait ILayer<B: IBackend> : ComputeOutput<f32, B> + ComputeInputGradient<f32
         let weights_data_: Vec<&SharedTensor<f32>> = wgts.iter().enumerate().map(|(_, val)| &**val).collect();
 
         let out_ref = output_data.iter().cloned().collect::<Vec<_>>();
-        let mut out = &mut out_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
-        let mut output_w = &mut out.iter_mut().map(|a| a).collect::<Vec<_>>();
+        let out = &mut out_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
+        let output_w = &mut out.iter_mut().map(|a| a).collect::<Vec<_>>();
         let mut output_data_: Vec<&mut SharedTensor<f32>> = output_w.iter_mut().enumerate().map(|(_, val)| &mut ***val).collect();
 
         self.compute_output(backend, &weights_data_, &input_data_, &mut output_data_);
@@ -990,8 +990,8 @@ pub trait ILayer<B: IBackend> : ComputeOutput<f32, B> + ComputeInputGradient<f32
         let inp_data: Vec<_> = input_data.iter().map(|b| b.read().unwrap()).collect();
         let input_data_: Vec<&SharedTensor<f32>> = inp_data.iter().enumerate().map(|(_, val)| &**val).collect();
         let btm_gradient_ref = input_gradients.iter().cloned().collect::<Vec<_>>();
-        let mut btm_gradient = &mut btm_gradient_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
-        let mut input_gradient = &mut btm_gradient.iter_mut().map(|a| a).collect::<Vec<_>>();
+        let btm_gradient = &mut btm_gradient_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
+        let input_gradient = &mut btm_gradient.iter_mut().map(|a| a).collect::<Vec<_>>();
         let mut input_gradients_: Vec<&mut SharedTensor<f32>> = input_gradient.iter_mut().enumerate().map(|(_, val)| &mut ***val).collect();
 
         self.compute_input_gradient(backend, &weights_data_, &output_data_, &output_gradients_, &input_data_, &mut input_gradients_);
@@ -1018,8 +1018,8 @@ pub trait ILayer<B: IBackend> : ComputeOutput<f32, B> + ComputeInputGradient<f32
         let inp_data: Vec<_> = input_data.iter().map(|b| b.read().unwrap()).collect();
         let input_data_: Vec<&SharedTensor<f32>> = inp_data.iter().enumerate().map(|(_, val)| &**val).collect();
         let wgt_gradient_ref = weights_gradients.iter().cloned().collect::<Vec<_>>();
-        let mut wgt_gradient = &mut wgt_gradient_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
-        let mut weights_gradient = &mut wgt_gradient.iter_mut().map(|a| a).collect::<Vec<_>>();
+        let wgt_gradient = &mut wgt_gradient_ref.iter().map(|b| b.write().unwrap()).collect::<Vec<_>>();
+        let weights_gradient = &mut wgt_gradient.iter_mut().map(|a| a).collect::<Vec<_>>();
         let mut weights_gradients_: Vec<&mut SharedTensor<f32>> = weights_gradient.iter_mut().enumerate().map(|(_, val)| &mut ***val).collect();
 
         self.compute_parameters_gradient(backend, &output_data_, &output_gradients_, &input_data_, &mut weights_gradients_);
@@ -1276,7 +1276,7 @@ pub trait ComputeParametersGradient<T, B: IBackend> {
                                    parameters_gradients: &mut [&mut SharedTensor<T>]) {}
 }
 
-impl<B: IBackend> fmt::Debug for ILayer<B> {
+impl<B: IBackend> fmt::Debug for dyn ILayer<B> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "({})", "ILayer")
     }
@@ -1473,7 +1473,7 @@ impl LayerConfig {
 
     /// Check if the configured parameters make sense.
     pub fn validate(&self) -> Result<(), &'static str> {
-        try!(self.validate_propagate_down_len());
+        r#try!(self.validate_propagate_down_len());
         Ok(())
     }
 

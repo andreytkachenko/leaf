@@ -1,10 +1,10 @@
 //! Provides configuration of weights and their initialization.
 use rand;
 use rand::distributions::{IndependentSample, Range};
-use co::{ITensorDesc, SharedTensor};
-use util::native_backend;
-use leaf_capnp::weight_config as capnp_config;
-use capnp_util::*;
+use crate::co::{ITensorDesc, SharedTensor};
+use crate::util::native_backend;
+use crate::leaf_capnp::weight_config as capnp_config;
+use crate::capnp_util::*;
 
 #[derive(Debug, Clone)]
 /// Specifies training configuration for a weight blob.

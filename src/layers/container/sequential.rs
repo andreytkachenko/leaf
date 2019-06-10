@@ -3,12 +3,12 @@ use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use std::sync::{Arc, RwLock};
-use co::{IBackend, SharedTensor};
-use layer::*;
-use util::{ArcLock, LayerOps};
-use leaf_capnp::sequential_config as capnp_config;
-use leaf_capnp::shaped_input as capnp_shaped_input;
-use capnp_util::*;
+use crate::co::{IBackend, SharedTensor};
+use crate::layer::*;
+use crate::util::{ArcLock, LayerOps};
+use crate::leaf_capnp::sequential_config as capnp_config;
+use crate::leaf_capnp::shaped_input as capnp_shaped_input;
+use crate::capnp_util::*;
 
 #[derive(Debug)] /// Sequential Layer
 pub struct Sequential<B: IBackend + LayerOps<f32>> {
@@ -157,7 +157,7 @@ impl<B: IBackend + LayerOps<f32> + 'static> Sequential<B> {
         } else {
             info!("Input {} -> {}", self.input_data_tensors.len(), tensor_name);
 
-            let ibackend: Rc<IBackend<F=B::F>> = backend;
+            let ibackend: Rc<dyn IBackend<F=B::F>> = backend;
             let data_tensor: ArcLock<SharedTensor<f32>> = Arc::new(RwLock::new(SharedTensor::new(ibackend.device(), &input_shape).unwrap()));
             let gradient_tensor: ArcLock<SharedTensor<f32>> = Arc::new(RwLock::new(SharedTensor::new(ibackend.device(), &input_shape).unwrap()));
 

@@ -31,11 +31,11 @@
 pub use self::sgd::{Momentum};
 pub mod sgd;
 
-use co::{IBackend, MemoryType, SharedTensor};
-use conn::NN;
-use solver::*;
-use layer::*;
-use util::*;
+use crate::co::{IBackend, MemoryType, SharedTensor};
+use crate::conn::NN;
+use crate::solver::*;
+use crate::layer::*;
+use crate::util::*;
 
 trait SGDSolver<SolverB: IBackend + SolverOps<f32>, NetB: IBackend + LayerOps<f32>> : ISolver<SolverB, NetB> {
     fn compute_update_value(&mut self,

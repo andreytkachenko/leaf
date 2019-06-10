@@ -4,7 +4,7 @@ extern crate collenchyma as co;
 #[cfg(test)]
 mod layer_spec {
     use std::rc::Rc;
-    use co::prelude::*;
+    use crate::co::prelude::*;
     use leaf::layer::*;
 
     fn new_layer_config() -> LayerConfig {
@@ -38,7 +38,7 @@ mod layer_spec {
 
     #[cfg(feature="native")]
     mod native {
-        use co::prelude::*;
+        use crate::co::prelude::*;
         use leaf::layer::*;
         use leaf::layers::*;
         use super::native_backend;
@@ -57,7 +57,7 @@ mod layer_spec {
             let mut original_layer = Layer::from_config(native_backend(), &cfg);
 
             original_layer.save("target/testnetwork").unwrap();
-            let mut loaded_layer = Layer::<Backend<Native>>::load(native_backend(), "target/testnetwork").unwrap();
+            let loaded_layer = Layer::<Backend<Native>>::load(native_backend(), "target/testnetwork").unwrap();
 
             assert_eq!(original_layer.input_blob_names(), loaded_layer.input_blob_names());
 

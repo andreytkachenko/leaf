@@ -6,12 +6,12 @@
 //! The max function used in ReLU is usually faster to compute than the exponentiation
 //! needed in a Sigmoid layer.
 
-use co::{IBackend,SharedTensor};
-use conn::Relu;
+use crate::co::{IBackend,SharedTensor};
+use crate::conn::Relu;
 #[cfg(all(feature="cuda", not(feature="native")))]
 use conn::ReluPointwise;
-use layer::*;
-use util::ArcLock;
+use crate::layer::*;
+use crate::util::ArcLock;
 
 #[derive(Debug, Clone)]
 #[allow(missing_copy_implementations)]

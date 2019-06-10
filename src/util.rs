@@ -1,8 +1,8 @@
 //! Provides common utility functions
 use std::sync::{Arc, RwLock};
-use co::prelude::*;
-use coblas::plugin::*;
-use conn;
+use crate::co::prelude::*;
+use crate::coblas::plugin::*;
+use crate::conn;
 use num::traits::{NumCast, cast};
 
 /// Shared Lock used for our tensors
@@ -27,7 +27,7 @@ pub fn write_to_memory<T: NumCast + ::std::marker::Copy>(mem: &mut MemoryType, d
 pub fn write_to_memory_offset<T: NumCast + ::std::marker::Copy>(mem: &mut MemoryType, data: &[T], offset: usize) {
     match mem {
         &mut MemoryType::Native(ref mut mem) => {
-            let mut mem_buffer = mem.as_mut_slice::<f32>();
+            let mem_buffer = mem.as_mut_slice::<f32>();
             for (index, datum) in data.iter().enumerate() {
                 // mem_buffer[index + offset] = *datum;
                 mem_buffer[index + offset] = cast(*datum).unwrap();
@@ -79,18 +79,18 @@ pub trait Axpby<F> : Axpy<F> + Scal<F> {
     /// Performs the operation y := a*x + b*y .
     ///
     /// Consists of a scal(b, y) followed by a axpby(a,x,y).
-    fn axpby(&self, a: &mut SharedTensor<F>, x: &mut SharedTensor<F>, b: &mut SharedTensor<F>, y: &mut SharedTensor<F>) -> Result<(), ::co::error::Error> {
-        try!(self.scal(b, y));
-        try!(self.axpy(a, x, y));
+    fn axpby(&self, a: &mut SharedTensor<F>, x: &mut SharedTensor<F>, b: &mut SharedTensor<F>, y: &mut SharedTensor<F>) -> Result<(), crate::co::error::Error> {
+        r#try!(self.scal(b, y));
+        r#try!(self.axpy(a, x, y));
         Ok(())
     }
 
     /// Performs the operation y := a*x + b*y .
     ///
     /// Consists of a scal(b, y) followed by a axpby(a,x,y).
-    fn axpby_plain(&self, a: &SharedTensor<F>, x: &SharedTensor<F>, b: &SharedTensor<F>, y: &mut SharedTensor<F>) -> Result<(), ::co::error::Error> {
-        try!(self.scal_plain(b, y));
-        try!(self.axpy_plain(a, x, y));
+    fn axpby_plain(&self, a: &SharedTensor<F>, x: &SharedTensor<F>, b: &SharedTensor<F>, y: &mut SharedTensor<F>) -> Result<(), crate::co::error::Error> {
+        r#try!(self.scal_plain(b, y));
+        r#try!(self.axpy_plain(a, x, y));
         Ok(())
     }
 }

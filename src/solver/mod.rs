@@ -9,11 +9,11 @@ pub use self::confusion_matrix::ConfusionMatrix;
 
 use std::rc::Rc;
 use std::marker::PhantomData;
-use co::prelude::*;
-use layer::*;
-use layers::SequentialConfig;
-use solvers::*;
-use util::{ArcLock, LayerOps, SolverOps};
+use crate::co::prelude::*;
+use crate::layer::*;
+use crate::layers::SequentialConfig;
+use crate::solvers::*;
+use crate::util::{ArcLock, LayerOps, SolverOps};
 
 #[derive(Debug)]
 /// Solver that optimizes a [Layer][1] with a given objective.
@@ -22,7 +22,7 @@ pub struct Solver<SolverB: IBackend + SolverOps<f32>, B: IBackend + LayerOps<f32
     net: Layer<B>,
     objective: Layer<SolverB>,
     /// The implementation of the Solver
-    pub worker: Box<ISolver<SolverB, B>>,
+    pub worker: Box<dyn ISolver<SolverB, B>>,
 
     config: SolverConfig,
 
@@ -128,7 +128,7 @@ pub trait ISolver<SolverB, B: IBackend + LayerOps<f32>> {
     fn backend(&self) -> &SolverB;
 }
 
-impl<SolverB, B: IBackend + LayerOps<f32>> ::std::fmt::Debug for ISolver<SolverB, B> {
+impl<SolverB, B: IBackend + LayerOps<f32>> ::std::fmt::Debug for dyn ISolver<SolverB, B> {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         write!(f, "({})", "ILayer")
     }
@@ -337,7 +337,7 @@ pub enum SolverKind {
 
 impl SolverKind {
     /// Create a Solver of the specified kind with the supplied SolverConfig.
-    pub fn with_config<B: IBackend + SolverOps<f32> + 'static, NetB: IBackend + LayerOps<f32> + 'static>(&self, backend: Rc<B>, config: &SolverConfig) -> Box<ISolver<B, NetB>> {
+    pub fn with_config<B: IBackend + SolverOps<f32> + 'static, NetB: IBackend + LayerOps<f32> + 'static>(&self, backend: Rc<B>, config: &SolverConfig) -> Box<dyn ISolver<B, NetB>> {
         match *self {
             SolverKind::SGD(sgd) => {
                 sgd.with_config(backend, config)
@@ -356,7 +356,7 @@ pub enum SGDKind {
 
 impl SGDKind {
     /// Create a Solver of the specified kind with the supplied SolverConfig.
-    pub fn with_config<B: IBackend + SolverOps<f32> + 'static, NetB: IBackend + LayerOps<f32> + 'static>(&self, backend: Rc<B>, config: &SolverConfig) -> Box<ISolver<B, NetB>> {
+    pub fn with_config<B: IBackend + SolverOps<f32> + 'static, NetB: IBackend + LayerOps<f32> + 'static>(&self, backend: Rc<B>, config: &SolverConfig) -> Box<dyn ISolver<B, NetB>> {
         match *self {
             SGDKind::Momentum => {
                 Box::new(Momentum::<B>::new(backend))

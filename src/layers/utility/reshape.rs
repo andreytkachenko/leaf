@@ -15,11 +15,11 @@
 //! - `C` : number of feature maps
 //! - `H` : height
 //! - `W` : width
-use co::{IBackend, SharedTensor};
-use layer::*;
-use util::ArcLock;
-use leaf_capnp::reshape_config as capnp_config;
-use capnp_util::*;
+use crate::co::{IBackend, SharedTensor};
+use crate::layer::*;
+use crate::util::ArcLock;
+use crate::leaf_capnp::reshape_config as capnp_config;
+use crate::capnp_util::*;
 
 #[derive(Debug, Clone)]
 /// Reshape Utility Layer

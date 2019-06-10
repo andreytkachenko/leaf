@@ -12,14 +12,14 @@
 //! since if you keep adjusting the gradients
 //! into the same direction you will reach the optimum faster.
 //! It also makes solving more stable.
-use co::prelude::*;
-use coblas::plugin::Copy;
-use layer::*;
-use solver::*;
-use solvers::SGDSolver;
+use crate::co::prelude::*;
+use crate::coblas::plugin::Copy;
+use crate::layer::*;
+use crate::solver::*;
+use crate::solvers::SGDSolver;
 use std::rc::Rc;
 use std::sync::{Arc, RwLock};
-use util::*;
+use crate::util::*;
 
 #[derive(Debug)]
 /// Stochastic Gradient Descent with Momentum.
@@ -71,11 +71,11 @@ impl<B: IBackend + SolverOps<f32>, NetB: IBackend + LayerOps<f32> + 'static> SGD
                             history_blob_id: usize,
                             global_lr: &f32,
                             blob_lr: &f32) {
-        ::weight::FillerType::Constant {
+        crate::weight::FillerType::Constant {
             value: global_lr * blob_lr
         }.fill(&mut self.lr);
 
-        ::weight::FillerType::Constant {
+        crate::weight::FillerType::Constant {
             value: config.momentum
         }.fill(&mut self.momentum);
 

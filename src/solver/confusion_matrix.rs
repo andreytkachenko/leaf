@@ -2,8 +2,8 @@
 use std::collections::VecDeque;
 use std::fmt;
 
-use co::SharedTensor;
-use util::native_backend;
+use crate::co::SharedTensor;
+use crate::util::native_backend;
 /// A [ConfusionMatrix][wiki].
 ///
 /// [wiki]: https://en.wikipedia.org/wiki/Confusion_matrix
