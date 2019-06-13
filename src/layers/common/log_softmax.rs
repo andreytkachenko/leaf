@@ -19,6 +19,7 @@ impl<B: IBackend + conn::LogSoftmax<f32>> ILayer<B> for LogSoftmax {
                weights_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_data: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>) {
+        info!("LogSoftmax: reshape");
         let input_desc = input_data[0].read().unwrap().desc().clone();
         input_gradient[0].write().unwrap().resize(&input_desc).unwrap();
         output_data[0].write().unwrap().resize(&input_desc).unwrap();

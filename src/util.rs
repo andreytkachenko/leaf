@@ -80,8 +80,8 @@ pub trait Axpby<F> : Axpy<F> + Scal<F> {
     ///
     /// Consists of a scal(b, y) followed by a axpby(a,x,y).
     fn axpby(&self, a: &mut SharedTensor<F>, x: &mut SharedTensor<F>, b: &mut SharedTensor<F>, y: &mut SharedTensor<F>) -> Result<(), crate::co::error::Error> {
-        r#try!(self.scal(b, y));
-        r#try!(self.axpy(a, x, y));
+        self.scal(b, y)?;
+        self.axpy(a, x, y)?;
         Ok(())
     }
 
@@ -89,8 +89,8 @@ pub trait Axpby<F> : Axpy<F> + Scal<F> {
     ///
     /// Consists of a scal(b, y) followed by a axpby(a,x,y).
     fn axpby_plain(&self, a: &SharedTensor<F>, x: &SharedTensor<F>, b: &SharedTensor<F>, y: &mut SharedTensor<F>) -> Result<(), crate::co::error::Error> {
-        r#try!(self.scal_plain(b, y));
-        r#try!(self.axpy_plain(a, x, y));
+        self.scal_plain(b, y)?;
+        self.axpy_plain(a, x, y)?;
         Ok(())
     }
 }

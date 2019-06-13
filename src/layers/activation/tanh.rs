@@ -39,6 +39,7 @@ impl<B: IBackend + conn::Tanh<f32> + conn::TanhPointwise<f32>> ILayer<B> for Tan
                weights_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_data: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>) {
+        info!("Tanh: reshape");
         if let Some(inp) = input_data.get(0) {
             let read_inp = inp.read().unwrap();
             let input_desc = read_inp.desc();

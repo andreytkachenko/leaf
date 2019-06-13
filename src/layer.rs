@@ -257,12 +257,14 @@ impl<B: IBackend> Layer<B> {
                 format!("{}-{}", self.name, weight_id)
             };
             self.weights_display_names.push(display_name.clone());
+            
             // create name for registry
             let registry_name = format!("SHARED_WEIGHT_{}", display_name);
 
             // add to tracking vectors
             let net_weight_id = weights_len;
             let output_data = self.output_blobs_data[weight_id].read().unwrap();
+
             debug!("Layer {} - creating weight and gradient of size {:?}", &layer_config.name, output_data.desc());
             let weight_data = Arc::new(RwLock::new(SharedTensor::<f32>::new(output_data.latest_device(), output_data.desc()).unwrap()));
             let weight_gradient = Arc::new(RwLock::new(SharedTensor::<f32>::new(output_data.latest_device(), output_data.desc()).unwrap()));
@@ -324,6 +326,8 @@ impl<B: IBackend> Layer<B> {
     }
 
     fn reshape(&mut self) {
+        info!("reshape(self.is_using_in_place() = {})", self.is_using_in_place());
+
         match self.is_using_in_place() {
             false => {
                 self.worker.reshape(self.backend.clone(),
@@ -618,7 +622,7 @@ impl<B: IBackend> Layer<B> {
     /// ```
     pub fn save<P: AsRef<Path>>(&mut self, path: P) -> io::Result<()> {
         let path = path.as_ref();
-        let ref mut out = r#try!(File::create(path));
+        let ref mut out = File::create(path)?;
 
         let mut message = ::capnp::message::Builder::new_default();
         {
@@ -669,7 +673,7 @@ impl<B: IBackend> Layer<B> {
     /// ```
     pub fn load<LB: IBackend + LayerOps<f32> + 'static, P: AsRef<Path>>(backend: Rc<LB>, path: P) -> io::Result<Layer<LB>> {
         let path = path.as_ref();
-        let ref mut file = r#try!(File::open(path));
+        let ref mut file = File::open(path)?;
         let mut reader = BufReader::new(file);
 
         let message_reader = ::capnp::serialize_packed::read_message(&mut reader,
@@ -842,6 +846,9 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
     pub fn from_config(backend: Rc<B>, config: &LayerConfig) -> Layer<B> {
         let cl = config.clone();
         let cfg = Box::<LayerConfig>::new(cl);
+
+        println!("a {}", &cfg.name);
+        
         let mut layer = Layer {
             name: cfg.name.clone(),
 
@@ -872,6 +879,7 @@ impl<B: IBackend + LayerOps<f32> + 'static> Layer<B> {
             worker: Layer::<B>::worker_from_config(backend, &cfg),
             config: cfg,
         };
+
         layer.expose_inputs();
         layer.expose_outputs();
 
@@ -1473,7 +1481,7 @@ impl LayerConfig {
 
     /// Check if the configured parameters make sense.
     pub fn validate(&self) -> Result<(), &'static str> {
-        r#try!(self.validate_propagate_down_len());
+        self.validate_propagate_down_len()?;
         Ok(())
     }
 

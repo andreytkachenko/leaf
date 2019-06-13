@@ -97,6 +97,7 @@ impl<B: IBackend + Relu<f32>> ILayer<B> for ReLU {
                weights_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_data: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>) {
+
         if let Some(inp) = input_data.get(0) {
             let read_inp = inp.read().unwrap();
             let input_desc = read_inp.desc();

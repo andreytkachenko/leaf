@@ -41,6 +41,8 @@ pub struct Linear {
 impl Linear {
     /// Create a Linear layer from a LinearConfig.
     pub fn from_config(config: &LinearConfig) -> Linear {
+        println!("linear");
+
         let one = native_scalar(1f32);
         let zero = native_scalar(0f32);
 
@@ -91,6 +93,8 @@ impl<B: IBackend + LayerOps<f32>> ILayer<B> for Linear {
                weights_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_data: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>) {
+        info!("Linear: reshape");
+
         let input = input_data[0].read().unwrap();
         // reshape top
         let output_shape = self.calculate_output_shape(input.desc());

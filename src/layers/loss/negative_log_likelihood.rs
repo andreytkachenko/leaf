@@ -53,6 +53,8 @@ impl<B: IBackend> ILayer<B> for NegativeLogLikelihood {
                weights_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_data: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>) {
+        info!("NegativeLogLikelihood reshape");
+
         let data = input_data[0].read().unwrap();
         let label = input_data[1].read().unwrap();
 

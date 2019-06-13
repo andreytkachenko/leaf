@@ -5,11 +5,11 @@ extern crate collenchyma as co;
 extern crate leaf;
 
 use crate::co::prelude::*;
-
-
-
+use crate::leaf::layers::*;
+use crate::leaf::layer::*;
 
 use std::rc::Rc;
+use std::sync::{Arc, RwLock};
 use std::env;
 
 fn main() {
@@ -35,14 +35,15 @@ fn main() {
     }
 }
 
-#[cfg(feature = "native")]
-#[allow(dead_code)]
-fn native_backend() -> Rc<Backend<Native>> {
-    let framework = Native::new();
-    let hardwares = &framework.hardwares().to_vec();
-    let backend_config = BackendConfig::new(framework, hardwares);
-    Rc::new(Backend::new(backend_config).unwrap())
-}
+// #[cfg(feature = "native")]
+// #[allow(dead_code)]
+// fn native_backend() -> Rc<Backend<Native>> {
+//     panic!("not supported")
+//     // let framework = Native::new();
+//     // let hardwares = &framework.hardwares().to_vec();
+//     // let backend_config = BackendConfig::new(framework, hardwares);
+//     // Rc::new(Backend::new(backend_config).unwrap())
+// }
 
 #[cfg(feature = "cuda")]
 #[allow(dead_code)]
@@ -54,14 +55,14 @@ fn cuda_backend() -> Rc<Backend<Cuda>> {
     Rc::new(Backend::new(backend_config).unwrap())
 }
 
-#[cfg(feature = "opencl")]
-#[allow(dead_code)]
-fn opencl_backend() -> Rc<Backend<OpenCL>> {
-    let framework = OpenCL::new();
-    let hardwares = &framework.hardwares()[1..2].to_vec();
-    let backend_config = BackendConfig::new(framework, hardwares);
-    Rc::new(Backend::new(backend_config).unwrap())
-}
+// #[cfg(feature = "opencl")]
+// #[allow(dead_code)]
+// fn opencl_backend() -> Rc<Backend<OpenCL>> {
+//     let framework = OpenCL::new();
+//     let hardwares = &framework.hardwares()[1..2].to_vec();
+//     let backend_config = BackendConfig::new(framework, hardwares);
+//     Rc::new(Backend::new(backend_config).unwrap())
+// }
 
 #[inline(never)]
 fn bench_profile<F: FnMut() -> ()>(
@@ -112,12 +113,14 @@ fn get_time_scale<'a>(sec: f64) -> (f64, &'a str) {
     }
 }
 
-#[cfg(feature="native")]
-fn bench_alexnet() {
-    println!("Examples run only with CUDA support at the moment, because of missing native convolution implementation for the Collenchyma NN Plugin.");
-    println!("Try running with `cargo run --release --no-default-features --features cuda --example benchmarks alexnet`.");
-}
-#[cfg(all(feature="cuda", not(feature="native")))]
+// #[cfg(feature="native")]
+// fn bench_alexnet() {
+//     println!("Examples run only with CUDA support at the moment, because of missing native convolution implementation for the Collenchyma NN Plugin.");
+//     println!("Try running with `cargo run --release --no-default-features --features cuda --example benchmarks alexnet`.");
+// }
+
+#[cfg(feature="cuda")]
+// #[cfg(all(feature="cuda", not(feature="native")))]
 fn bench_alexnet() {
     let mut cfg = SequentialConfig::default();
     cfg.add_input("data", &vec![128, 3, 224, 224]);
@@ -194,12 +197,14 @@ fn bench_alexnet() {
     }
 }
 
-#[cfg(feature="native")]
-fn bench_overfeat() {
-    println!("Examples run only with CUDA support at the moment, because of missing native convolution implementation for the Collenchyma NN Plugin.");
-    println!("Try running with `cargo run --release --no-default-features --features cuda --example benchmarks overfeat`.");
-}
-#[cfg(all(feature="cuda", not(feature="native")))]
+// #[cfg(feature="native")]
+// fn bench_overfeat() {
+//     println!("Examples run only with CUDA support at the moment, because of missing native convolution implementation for the Collenchyma NN Plugin.");
+//     println!("Try running with `cargo run --release --no-default-features --features cuda --example benchmarks overfeat`.");
+// }
+
+#[cfg(feature="cuda")]
+// #[cfg(all(feature="cuda", not(feature="native")))]
 fn bench_overfeat() {
     let mut cfg = SequentialConfig::default();
     cfg.add_input("data", &vec![128, 3, 231, 231]);
@@ -276,12 +281,14 @@ fn bench_overfeat() {
     }
 }
 
-#[cfg(feature="native")]
-fn bench_vgg_a() {
-    println!("Examples run only with CUDA support at the moment, because of missing native convolution implementation for the Collenchyma NN Plugin.");
-    println!("Try running with `cargo run --release --no-default-features --features cuda --example benchmarks vgg`.");
-}
-#[cfg(all(feature="cuda", not(feature="native")))]
+// #[cfg(feature="native")]
+// fn bench_vgg_a() {
+//     println!("Examples run only with CUDA support at the moment, because of missing native convolution implementation for the Collenchyma NN Plugin.");
+//     println!("Try running with `cargo run --release --no-default-features --features cuda --example benchmarks vgg`.");
+// }
+
+#[cfg(feature="cuda")]
+// #[cfg(all(feature="cuda", not(feature="native")))]
 fn bench_vgg_a() {
     let mut cfg = SequentialConfig::default();
     cfg.add_input("data", &vec![64, 3, 224, 224]);

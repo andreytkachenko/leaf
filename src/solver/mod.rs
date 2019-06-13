@@ -130,7 +130,7 @@ pub trait ISolver<SolverB, B: IBackend + LayerOps<f32>> {
 
 impl<SolverB, B: IBackend + LayerOps<f32>> ::std::fmt::Debug for dyn ISolver<SolverB, B> {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        write!(f, "({})", "ILayer")
+        write!(f, "({})", "ISolver")
     }
 }
 

@@ -97,6 +97,8 @@ impl<B: IBackend + conn::Pooling<f32>> ILayer<B> for Pooling<f32, B> {
                weights_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_data: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>) {
+        info!("Pooling reshape");
+
         for i in 0..input_data.len() {
             let inp = input_data[0].read().unwrap();
             let input_shape = inp.desc();

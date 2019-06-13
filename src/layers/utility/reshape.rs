@@ -53,6 +53,8 @@ impl<B: IBackend> ILayer<B> for Reshape {
                weights_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_data: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>) {
+        info!("Reshape reshape");
+
         output_data[0].write().unwrap().resize(&self.shape).unwrap();
         output_gradient[0].write().unwrap().resize(&self.shape).unwrap();
     }

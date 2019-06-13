@@ -122,23 +122,30 @@ impl<B: IBackend + conn::Convolution<f32>> ILayer<B> for Convolution<B> {
                weights_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_data: &mut Vec<ArcLock<SharedTensor<f32>>>,
                output_gradient: &mut Vec<ArcLock<SharedTensor<f32>>>) {
+
         for i in 0..input_data.len() {
             let inp = input_data[0].read().unwrap();
             let mut output_data = output_data[0].write().unwrap();
             let mut output_gradient = output_gradient[0].write().unwrap();
             let input_shape = inp.desc();
             let output_shape = self.calculate_output_shape(input_shape);
+
             output_data.resize(&output_shape).unwrap();
             output_gradient.resize(&output_shape).unwrap();
 
             let device = <B as IBackend>::device(&backend);
             let num_spatial_dims = self.num_spatial_dims(inp.desc());
             let mut filter = self.create_filter(device, input_shape);
+            
             let stride = cast_vec_usize_to_i32(self.stride_dims(num_spatial_dims));
             let padding = cast_vec_usize_to_i32(self.padding_dims(num_spatial_dims));
 
-            let config = backend.new_convolution_config(&inp, &output_data, &mut filter,
-                                                        conn::ConvForwardAlgo::Auto, conn::ConvBackwardFilterAlgo::Auto, conn::ConvBackwardDataAlgo::Auto,
+            let inptt: &SharedTensor<f32> = &inp;
+            let outputt: &SharedTensor<f32> = &output_data;
+            let config = backend.new_convolution_config(inptt, outputt, &mut filter,
+                                                        conn::ConvForwardAlgo::Auto, 
+                                                        conn::ConvBackwardFilterAlgo::Auto, 
+                                                        conn::ConvBackwardDataAlgo::Auto,
                                                         &stride, &padding).unwrap();
 
             // resize and fill weights
@@ -147,6 +154,7 @@ impl<B: IBackend + conn::Convolution<f32>> ILayer<B> for Convolution<B> {
                 input_size: inp.desc().size(),
                 output_size: output_shape.size(),
             };
+
             filler.fill(&mut weights_data[0].write().unwrap());
             weights_gradient[0].write().unwrap().resize(filter.desc()).unwrap();
             self.convolution_config = Some(Rc::new(config));

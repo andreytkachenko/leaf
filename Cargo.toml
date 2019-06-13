@@ -16,11 +16,11 @@ license = "MIT OR Apache-2.0"
 build = "build.rs"
 
 [dependencies]
-collenchyma = { version = "0.0.8", default-features = false, features = ["native"] } # native feature to read/write data into tensors
-collenchyma-blas = { version = "0.2.0", default-features = false, features = ["native"] } # only compiles with native feature
-collenchyma-nn = { version = "0.3.2", default-features = false }
+collenchyma = { version = "0.0.8", path="../collenchyma", default-features = false, features = ["native"] } # native feature to read/write data into tensors
+collenchyma-blas = { version = "0.2.0", path="../collenchyma-blas", default-features = false, features = ["native"] } # only compiles with native feature
+collenchyma-nn = { version = "0.3.2", path="../collenchyma-nn", default-features = false }
 
-log = "0.3.2"
+log = "0.4"
 rand = "0.3.0"
 num = "0.1"
 
@@ -37,7 +37,7 @@ capnpc = "0.6.1"
 env_logger = "0.3"
 
 [features]
-default = ["native"]
+default = ["cuda"]
 native = ["collenchyma-blas/native", "collenchyma-nn/native"]
 cuda = ["collenchyma/cuda", "collenchyma-blas/cuda", "collenchyma-nn/cuda"]
 opencl = ["collenchyma/opencl", "collenchyma-blas/opencl", "collenchyma-nn/opencl"]
